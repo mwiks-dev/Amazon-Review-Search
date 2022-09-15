@@ -1,62 +1,41 @@
 import os
+import re
 
 
 # Define path
 path = "files"
-stopwords = open("stop_words.txt","r")
+stopwords = open("stop_words.txt", "r")
 stop_words = stopwords.read()
 
-
+file = {}
 for filename in os.listdir(path):
-   with open(os.path.join(path, filename), 'r') as f: 
-    content = f.read()
-    # print(content)
-    f.seek(0)
-    array = []
-    array.append(f.readline())
-    # print(array)
-    line = 1
-    for word in f:
-        if word == '\n':
-            line += 1
-    # print("Number of lines in file is: ", line)
-    punc = '''!()-[]{};:'"\, <>./?@#$%^&*_~'''
-    for ele in content:
-        if ele in punc:
-            content = content.replace(ele, " ")
-    content = content.lower()
+    # print(filename)
+    pattern = re.compile('[\W_]+')
+    # print(pattern)
+    file[filename] = open(os.path.join(path, filename), 'r').read().lower()
+    file[filename] = pattern.sub(' ', file[filename])
     from nltk.tokenize import word_tokenize
+    from nltk.tokenize.treebank import TreebankWordDetokenizer as Detok
+    detokenizer = Detok()
     for i in range(1):
-        # this will convert
-        # the word into tokens
-        text_tokens = word_tokenize(content)
+        # this will convert the word into tokens
+        text_tokens = word_tokenize(file[filename])
         # print(text_tokens)
-    
+
     tokens_without_sw = [
-        word for word in text_tokens if not word in stop_words]
+        word for word in text_tokens if word not in stop_words]
+    file[filename] = detokenizer.detokenize(tokens_without_sw)
+    # print(file[filename])
+    re.sub(r'[\W_]+', '', file[filename])
+    file[filename] = file[filename].split()
+    # print(file[filename])
+
+    fileIndex = {}
+    for index, word in enumerate(file[filename]):
+        if word in fileIndex.keys():
+            fileIndex[word].append(index)
+        else:
+            fileIndex[word] = [index]
+    print(fileIndex)
+
     
-    # print(tokens_without_sw)
-    dict = {}
-
-    for i in range(line):
-        check = array[i].lower()
-        for item in tokens_without_sw:
-
-            if item in check:
-                if item not in dict:
-                    dict[item] = []
-
-                if item in dict:
-                    dict[item].append(i+1)
-
-    print(dict)
-
-
-
-    	
-    
-
-
-
-
-
