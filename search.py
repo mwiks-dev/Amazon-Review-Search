@@ -1,41 +1,55 @@
 import os
-import re
+from string import punctuation
+from nltk.tokenize import word_tokenize
 
 
 # Define path
-path = "files"
-stopwords = open("stop_words.txt", "r")
-stop_words = stopwords.read()
+file_path = "files"
 
-file = {}
-for filename in os.listdir(path):
-    # print(filename)
-    pattern = re.compile('[\W_]+')
-    # print(pattern)
-    file[filename] = open(os.path.join(path, filename), 'r').read().lower()
-    file[filename] = pattern.sub(' ', file[filename])
-    from nltk.tokenize import word_tokenize
-    from nltk.tokenize.treebank import TreebankWordDetokenizer as Detok
-    detokenizer = Detok()
-    for i in range(1):
-        # this will convert the word into tokens
-        text_tokens = word_tokenize(file[filename])
-        # print(text_tokens)
+#reading the files
+for file in os.listdir(file_path):
+       with open(os.path.join(file_path, file), 'r') as open_file: 
+            content = open_file.read()
+            open_file.seek(0)
+            new_array = []
+            new_array.append(open_file.readline())
+            line = 1
+            for new_line in open_file:
+                if new_line == '\n':
+                    line += 1
+            punctuation = '''!()-[]{};:'"\, <>./?@#$%^&*_~'''
+            for element in content:
+                if element in punctuation:
+                    content = content.replace(element, " ")
+            content = content.lower()
+            import nltk
+            nltk.download('punkt')
 
-    tokens_without_sw = [
-        word for word in text_tokens if word not in stop_words]
-    file[filename] = detokenizer.detokenize(tokens_without_sw)
-    # print(file[filename])
-    re.sub(r'[\W_]+', '', file[filename])
-    file[filename] = file[filename].split()
-    # print(file[filename])
+            from nltk.tokenize import word_tokenize
+            stopwords = open("stop_words.txt","r")
+            stop_words = stopwords.read()
+            for i in range(1):
+                word_tokens = word_tokenize(content)
 
-    fileIndex = {}
-    for index, word in enumerate(file[filename]):
-        if word in fileIndex.keys():
-            fileIndex[word].append(index)
-        else:
-            fileIndex[word] = [index]
-    print(fileIndex)
+            tokens_without_stopwords = [
+                word for word in word_tokens if not word in stop_words]
+            # print(tokens_without_stopwords)
 
-    
+            word_dict = {}
+
+            for i in range(line):
+                check = new_array[i].lower()
+                for item in tokens_without_stopwords:
+                    if item in check:
+                        if item not in word_dict:
+                            word_dict[item] = []
+                        elif item in word_dict:
+                            word_dict[item].append(i+1)
+
+            print(word_dict)
+
+
+
+
+
+        
